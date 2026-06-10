@@ -1,6 +1,8 @@
 import Stripe from "stripe";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+export function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!);
+}
 
 export const PRO_PRICE_ID = process.env.STRIPE_PRO_PRICE_ID || "price_pro_monthly";
 

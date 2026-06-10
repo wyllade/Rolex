@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { stripe, PRO_PRICE_ID } from "@/lib/stripe";
+import { getStripe, PRO_PRICE_ID } from "@/lib/stripe";
 
 export async function POST() {
   try {
@@ -32,6 +32,7 @@ export async function POST() {
       .eq("user_id", user.id)
       .single();
 
+    const stripe = getStripe();
     const session = await stripe.checkout.sessions.create({
       customer: credits?.stripe_customer_id || undefined,
       customer_email: credits?.stripe_customer_id ? undefined : user.email,
