@@ -37,14 +37,14 @@ export default function SettingsPage() {
       <div className="rounded-lg border border-border p-4 space-y-4">
         <h2 className="font-semibold">Plan</h2>
         <p className="text-sm text-muted-foreground">
-          You're on the Free plan — 20 generations per month.
+          Manage your subscription and billing.
         </p>
-        <button
-          disabled
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground opacity-50 cursor-not-allowed"
+        <a
+          href="/dashboard/billing"
+          className="inline-block rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 transition-opacity"
         >
-          Upgrade to Pro (Coming soon)
-        </button>
+          View Billing
+        </a>
       </div>
 
       <div className="rounded-lg border border-border p-4 space-y-4">
