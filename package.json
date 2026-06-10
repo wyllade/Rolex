@@ -9,12 +9,16 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@stripe/react-stripe-js": "^6.6.0",
+    "@stripe/stripe-js": "^9.8.0",
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.108.1",
     "next": "16.2.9",
     "openai": "^6.42.0",
+    "posthog-js": "^1.384.1",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "stripe": "^22.2.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
