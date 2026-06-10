@@ -2,28 +2,41 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase";
+import CodeInput from "@/components/auth/code-input";
+
+type Step = "email" | "code" | "password";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [step, setStep] = useState<Step>("email");
   const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<"magic" | "password">("magic");
   const supabase = createClient();
 
-  const handleMagicLink = async (e: React.FormEvent) => {
+  const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithOtp({ email });
+    if (error) setError(error.message);
+    else setStep("code");
+    setLoading(false);
+  };
+
+  const handleVerifyCode = async (token: string) => {
+    setLoading(true);
+    setError(null);
+
+    const { error } = await supabase.auth.verifyOtp({
       email,
-      options: { shouldCreateUser: true },
+      token,
+      type: "email",
     });
 
     if (error) setError(error.message);
-    else setSent(true);
+    else window.location.href = "/dashboard/profile";
     setLoading(false);
   };
 
@@ -38,25 +51,6 @@ export default function LoginPage() {
     setLoading(false);
   };
 
-  if (sent) {
-    return (
-      <div className="flex min-h-screen items-center justify-center px-4">
-        <div className="max-w-sm text-center space-y-4">
-          <h1 className="text-2xl font-semibold">Check your email</h1>
-          <p className="text-sm text-muted-foreground">
-            We sent a sign-in link to <strong>{email}</strong>. Click the link to sign in.
-          </p>
-          <button
-            onClick={() => setSent(false)}
-            className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
-          >
-            Use a different email
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-6">
@@ -65,8 +59,8 @@ export default function LoginPage() {
           <p className="mt-1 text-sm text-muted-foreground">Build your personal brand with AI</p>
         </div>
 
-        {mode === "magic" ? (
-          <form onSubmit={handleMagicLink} className="space-y-4">
+        {step === "email" && (
+          <form onSubmit={handleSendCode} className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium">Email</label>
               <input
@@ -85,17 +79,44 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
             >
-              {loading ? "Sending link..." : "Send magic link"}
+              {loading ? "Sending code..." : "Send code"}
             </button>
             <button
               type="button"
-              onClick={() => setMode("password")}
+              onClick={() => setStep("password")}
               className="w-full text-center text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
             >
               Sign in with password instead
             </button>
           </form>
-        ) : (
+        )}
+
+        {step === "code" && (
+          <div className="space-y-4">
+            <p className="text-sm text-center text-muted-foreground">
+              Enter the code sent to <strong>{email}</strong>
+            </p>
+            <CodeInput onComplete={handleVerifyCode} />
+            {error && <p className="text-sm text-red-500 text-center">{error}</p>}
+            {loading && <p className="text-sm text-muted-foreground text-center">Verifying...</p>}
+            <div className="flex justify-center gap-4 text-sm">
+              <button
+                onClick={() => setStep("email")}
+                className="text-muted-foreground underline underline-offset-4 hover:text-foreground"
+              >
+                Change email
+              </button>
+              <button
+                onClick={() => { handleSendCode({ preventDefault: () => {} } as any); }}
+                className="text-muted-foreground underline underline-offset-4 hover:text-foreground"
+              >
+                Resend code
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === "password" && (
           <form onSubmit={handlePasswordLogin} className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium">Email</label>
@@ -131,10 +152,10 @@ export default function LoginPage() {
             </button>
             <button
               type="button"
-              onClick={() => setMode("magic")}
+              onClick={() => setStep("email")}
               className="w-full text-center text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
             >
-              Send magic link instead
+              Send code instead
             </button>
           </form>
         )}
