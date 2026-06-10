@@ -23,7 +23,7 @@ export default function RegisterPage() {
       password,
       options: {
         data: { full_name: name },
-        emailRedirectTo: `${location.origin}/auth/callback?next=/onboarding`,
+        emailRedirectTo: `${location.origin}/auth/callback?next=/dashboard/profile`,
       },
     });
 
@@ -36,7 +36,7 @@ export default function RegisterPage() {
     setLoading(true);
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${location.origin}/auth/callback?next=/onboarding` },
+      options: { redirectTo: `${location.origin}/auth/callback?next=/dashboard/profile` },
     });
     if (error) setError(error.message);
     setLoading(false);
