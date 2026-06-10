@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { trackEvent } from "@/lib/analytics";
 import Link from "next/link";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/dashboard/profile", label: "Profile" },
   { href: "/dashboard/assets", label: "Assets" },
+  { href: "/dashboard/billing", label: "Billing" },
   { href: "/dashboard/settings", label: "Settings" },
 ];
 
@@ -16,6 +18,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const tracked = useRef(false);
   const router = useRouter();
   const pathname = usePathname();
   const supabase = createClient();
@@ -23,7 +26,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) router.push("/login");
-      else setUser(user);
+      else {
+        setUser(user);
+        if (!tracked.current) {
+          trackEvent("signed_in", { method: user.app_metadata?.provider || "email" });
+          tracked.current = true;
+        }
+      }
       setLoading(false);
     });
   }, []);
