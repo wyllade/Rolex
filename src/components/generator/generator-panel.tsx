@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase";
+import { trackEvent } from "@/lib/analytics";
 
 const generatorLabels: Record<string, string> = {
   portfolio: "Portfolio Copy",
@@ -48,6 +49,7 @@ export default function GeneratorPanel({
       if (!res.ok) throw new Error(data.error);
 
       setResult(data.output);
+      trackEvent("generation_completed", { type });
       onComplete();
     } catch (err: any) {
       setError(err.message);
