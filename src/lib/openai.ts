@@ -1,14 +1,12 @@
 import OpenAI from "openai";
 
-export const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 export async function generateWithPrompt(
   promptTemplate: string,
   variables: Record<string, string>,
   model = "gpt-4o"
 ) {
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
   let prompt = promptTemplate;
   for (const [key, value] of Object.entries(variables)) {
     prompt = prompt.replace(`{{${key}}}`, value);
